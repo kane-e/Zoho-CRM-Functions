@@ -1,0 +1,96 @@
+resp = zoho.crm.getRecordById("Accounts",AccountId);
+//info resp;
+if(resp.getJson("Account_Type") == "Customer")
+{
+	championId = resp.getJson("Liscio_Champion").getJSON("id");
+	//info championId;
+	employeeCount = resp.getJson("Employees");
+	if(employeeCount < 5)
+	{
+		firmSize = "small";
+	}
+	else if(employeeCount >= 5 && employeeCount <= 10)
+	{
+		firmSize = "medium";
+	}
+	else
+	{
+		firmSize = "large";
+	}
+	metrics = zoho.crm.getRelatedRecords("Accounts","Accounts",AccountId).toList();
+	//info metrics;
+	accountName = metrics.getJson("Account").getJSON("name");
+	//info accountName;
+	metricOne = metrics.get(0).replaceAll("null",0);
+	metricTwo = metrics.get(1).replaceAll("null",0);
+	metricThree = metrics.get(2).replaceAll("null",0);
+	metricFour = metrics.get(3).replaceAll("null",0);
+	// metrics from current period
+	logIns = metricOne.getJson("Employee_Log_Ins") + metricTwo.getJson("Employee_Log_Ins");
+	messages = metricOne.getJson("Total_Messages") + metricTwo.getJson("Total_Messages");
+	files = metricOne.getJson("Total_Files_Uploaded") + metricTwo.getJson("Total_Files_Uploaded");
+	activation = (metricOne.getJson("of_Contacts_Active") + metricTwo.getJson("of_Contacts_Active")) / 2 * 100;
+	invitedContacts = ((metricOne.getJson("Invited_Contacts") + metricTwo.getJson("Invited_Contacts")) / 2).ceil();
+	activeContacts = ((metricOne.getJson("Active_Contacts") + metricTwo.getJson("Active_Contacts")) / 2).ceil();
+	expiredContacts = ((metricOne.getJson("Expired_Contacts") + metricTwo.getJson("Expired_Contacts")) / 2).ceil();
+	newContacts = ((metricOne.getJson("New_Contacts") + metricTwo.getJson("New_Contacts")) / 2).ceil();
+	employeeUsage = metricOne.getJson("Total_Employee_Usage").ceil() + metricTwo.getJson("Total_Employee_Usage").ceil();
+	clientUsage = metricOne.getJson("Total_Client_Usage").ceil() + metricTwo.getJson("Total_Client_Usage").ceil();
+	// metrics from past period
+	logInsOld = metricThree.getJson("Employee_Log_Ins") + metricFour.getJson("Employee_Log_Ins");
+	messagesOld = metricThree.getJson("Total_Messages") + metricFour.getJson("Total_Messages");
+	filesOld = metricThree.getJson("Total_Files_Uploaded") + metricFour.getJson("Total_Files_Uploaded");
+	activationOld = (metricThree.getJson("of_Contacts_Active") + metricFour.getJson("of_Contacts_Active")) / 2 * 100;
+	invitedContactsOld = ((metricThree.getJson("Invited_Contacts") + metricFour.getJson("Invited_Contacts")) / 2).ceil();
+	activeContactsOld = ((metricThree.getJson("Active_Contacts") + metricFour.getJson("Active_Contacts")) / 2).ceil();
+	expiredContactsOld = ((metricThree.getJson("Expired_Contacts") + metricFour.getJson("Expired_Contacts")) / 2).ceil();
+	newContactsOld = ((metricThree.getJson("New_Contacts") + metricFour.getJson("New_Contacts")) / 2).ceil();
+	employeeUsageOld = metricThree.getJson("Total_Employee_Usage").ceil() + metricFour.getJson("Total_Employee_Usage").ceil();
+	clientUsageOld = metricThree.getJson("Total_Client_Usage").ceil() + metricFour.getJson("Total_Client_Usage").ceil();
+	// difference between current and past periods 
+	activationDifference = (activation - activationOld).ceil();
+	filesDifference = files - filesOld;
+	messagesDifference = messages - messagesOld;
+	clientUsageDifference = clientUsage - clientUsageOld;
+	employeeUsageDifference = employeeUsage - employeeUsageOld;
+	//info logIns;
+	info activation;
+	info activationOld;
+	info activationDifference;
+	info files;
+	info filesOld;
+	info filesDifference;
+	info messages;
+	info messagesOld;
+	info messagesDifference;
+	info clientUsage;
+	info clientUsageOld;
+	info clientUsageDifference;
+	info employeeUsage;
+	info employeeUsageOld;
+	info employeeUsageDifference;
+	//info invitedContacts;
+	//info activeContacts;
+	//info expiredContacts;
+	//info newContacts;
+	newMap = Map();
+	newMap.put("Client_Name",accountName);
+	newMap.put("Firm_Size",firmSize);
+	newMap.put("Employee_Log_Ins",logIns);
+	newMap.put("Total_Messages",messages);
+	newMap.put("Total_Files_Uploaded",files);
+	newMap.put("of_Contacts_Active",activation);
+	newMap.put("Invited_Contacts",invitedContacts);
+	newMap.put("Active_Contacts",activeContacts);
+	newMap.put("Expired_Contacts",expiredContacts);
+	newMap.put("New_Contacts",newContacts);
+	newMap.put("Employee_Usage",employeeUsage);
+	newMap.put("Client_Usage",clientUsage);
+	newMap.put("Activation_Change",activationDifference);
+	newMap.put("Files_Change",filesDifference);
+	newMap.put("Messages_Change",messagesDifference);
+	newMap.put("Client_Usage_Change",clientUsageDifference);
+	newMap.put("Emp_Usage_Change",employeeUsageDifference);
+	updateResp = zoho.crm.updateRecord("Contacts",championId.toLong(),newMap);
+	info updateResp;
+}
