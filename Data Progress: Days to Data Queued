@@ -1,0 +1,24 @@
+//Time from OB start date to Queued
+
+resp = zoho.crm.getRecordById("Accounts",AccountId);
+data = zoho.crm.getRelatedRecords("Data","Accounts",AccountId);
+startDate = resp.getJSON("Onboarding_Start_Date");
+if(startDate != null)
+{
+	dataStage = data.getJSON("Data_Stage");
+	modifiedTime = data.getJSON("Modified_Time").subText(0,10);
+	currentDate = today;
+	info currentDate;
+	if(dataStage.contains("Queued"))
+	{
+		daysToQue = workDaysBetween(startDate,currentDate);
+		info daysToQue;
+	}
+	info startDate;
+	newMap = Map();
+	newMap.put("Days_to_Data_Queued",daysToQue);
+	// record date data was moved to queued so time to completed can be measured
+	newMap.put("Data_Queued_Date",currentDate);
+	updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+	info updateResp;
+}
