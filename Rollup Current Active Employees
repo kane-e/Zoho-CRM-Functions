@@ -1,0 +1,17 @@
+//Most Recent Employee Count
+
+resp = zoho.crm.getRelatedRecords("Accounts","Accounts",AccountId.toLong());
+respJson = resp.toJsonList();
+for each  rec in respJson
+{
+	activeEmployees = respJson.getJson("Employee_Count");
+}
+if(activeEmployees.isNull())
+{
+	activeEmployees = 0;
+}
+newMap = Map();
+newMap.put("Active_Employees",activeEmployees);
+updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+info activeEmployees;
+info updateResp;
