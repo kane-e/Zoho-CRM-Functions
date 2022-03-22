@@ -1,0 +1,42 @@
+// Accounts with no employee usage Nov 2020-April2021
+
+resp = zoho.crm.getRelatedRecords("Accounts","Accounts",AccountId.toLong());
+respJSON = resp.toJsonList();
+totalList = list();
+newMap = Map();
+if(respJSON.size() > 45)
+{
+	for each  metric in respJSON
+	{
+		if(metric.getJSON("Name").contains("2020-11") || metric.getJSON("Name").contains("2020-12") || metric.getJSON("Name").contains("2021-01") || metric.getJSON("Name").contains("2021-02") || metric.getJSON("Name").contains("2021-03") || metric.getJSON("Name").contains("2021-04"))
+		{
+			usage = metric.getJson("Total_Employee_Usage");
+			//info usage;
+			if(usage.isNull())
+			{
+				usage = 0;
+			}
+			totalList.add(usage);
+		}
+	}
+	averageUsage = totalList.average().ceil();
+	info averageUsage;
+	if(averageUsage < 5)
+	{
+		newMap.put("No_Emp_Usage",true);
+		updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+		info "true";
+	}
+	else
+	{
+		newMap.put("No_Emp_Usage",false);
+		updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+		info "false";
+	}
+}
+else
+{
+	newMap.put("No_Emp_Usage",false);
+	updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+	info "false";
+}
