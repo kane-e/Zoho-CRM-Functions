@@ -1,0 +1,43 @@
+//Rollup Highest, Average Active Employees
+resp = zoho.crm.getRelatedRecords("Accounts","Accounts",AccountId.toLong());
+//info resp;
+list = list();
+respList = resp.toJsonList();
+for each  rec in respList
+{
+	activeEmployees = respList.getJson("Employee_Count");
+	if(activeEmployees.isNull())
+	{
+		activeEmployees = 0;
+	}
+	employees = rec.getJson("Employee_Count");
+	list.add(employees);
+	list.removeAll("null");
+	highestCount = list.largest();
+}
+//info list;
+averageList = list.average().ceil();
+//info averageList;
+// Update features usage from metrics
+metrics = resp.toList();
+if(metrics.size() > 0)
+{
+	metric = metrics.get(0);
+	metricOne = metric.replaceAll("null",0);
+	eDocStatus = metricOne.getJSON("eDocs");
+	info eDocStatus;
+	dispatchStatus = metricOne.getJson("Desktop_App");
+	info dispatchStatus;
+	bulkMessageStatus = metricOne.getJson("Bulk_Messages");
+	bulkSigStatus = metricOne.getJson("Bulk_Get_a_Signature");
+	zoomStatus = metricOne.getJSON("Zoom");
+}
+newMap = Map();
+newMap.put("Average_Active_Employees",averageList);
+newMap.put("Highest_Level_of_EEs",highestCount);
+newMap.put("eDocs_Used",eDocStatus);
+newMap.put("Zoom_Connector",zoomStatus);
+newMap.put("Bulk_Messages",bulkMessageStatus);
+newMap.put("Bulk_Get_a_Signature",bulkSigStatus);
+newMap.put("Liscio_Dispatch",dispatchStatus);
+updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
