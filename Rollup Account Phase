@@ -1,0 +1,21 @@
+// If active contacts is greater than or equal to 25%, roll up "Roll Out Phase 2".  If active contacts is greater than or equal to 50%, rollup "Account Management".
+resp = zoho.crm.getRelatedRecords("Accounts","Accounts",AccountId.toLong());
+activeContacts = resp.getJSON("of_Contacts_Active");
+info activeContacts;
+if(activeContacts >= 0.5)
+{
+	activeContacts = "6 - Account Management";
+}
+else if(activeContacts >= .25 && activeContacts < .5)
+{
+	activeContacts = "5 - Roll Out Phase 2";
+}
+else
+{
+	activeContacts = "";
+}
+newMap = Map();
+newMap.put("Phase",activeContacts);
+updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+info activeContacts;
+info updateResp;
