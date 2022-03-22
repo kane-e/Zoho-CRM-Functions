@@ -1,0 +1,32 @@
+//Check Move Phase box if activation   does not match current onboarding stage
+
+results = zoho.crm.getRecordById("Accounts",AccountId.toLong());
+resp = zoho.crm.getRelatedRecords("Accounts","Accounts",AccountId.toLong());
+//info results;
+activeContacts = resp.getJSON("of_Contacts_Active");
+recordedPhase = results.getJSON("Onboarding_Stage");
+newMap = Map();
+//rollupPhase = results.getJSON("Phase");
+if(activeContacts >= 0.5)
+{
+	activeContacts = "6 - Account Management";
+}
+else if(activeContacts >= .25 && activeContacts < .5)
+{
+	activeContacts = "5 - Roll Out Phase 2";
+}
+else
+{
+	activeContacts = "";
+}
+if((activeContacts.containsIgnoreCase("Account Management") || activeContacts.containsIgnoreCase("Phase 2")) && activeContacts != recordedPhase)
+{
+	newMap.put("Move_Phase",true);
+	updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+}
+else
+{
+	newMap.put("Move_Phase",false);
+	updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+}
+info updateResp;
