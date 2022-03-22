@@ -1,0 +1,22 @@
+// Flag accounts with no notes recorded in past 60 days
+notes = zoho.crm.getRelatedRecords("Notes","Accounts",AccountId);
+newMap = Map();
+notesReport = false;
+if(notes.isEmpty())
+{
+	notesReport = true;
+}
+else
+{
+	lastNote = notes.getJSON("Created_Time").subText(0,10);
+	currentDate = today.toDate("yyyy-MM-dd");
+	daysSince = workDaysBetween(lastNote,currentDate);
+	info daysSince;
+	if(daysSince > 60)
+	{
+		notesReport = true;
+	}
+}
+newMap.put("Notes_Report",notesReport);
+updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+info updateResp;
