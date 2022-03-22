@@ -1,0 +1,20 @@
+// Flag accounts in RO Phase 1 or above & have more than 2 employees that have no purchased additional eDocs
+resp = zoho.crm.getRecordById("Accounts",AccountId);
+metrics = zoho.crm.getRelatedRecords("Accounts","Accounts",AccountId).replaceAll("null",0).toList();
+stage = resp.getJSON("Onboarding_Stage");
+//info resp;
+eDocsPurchased = resp.getJSON("eDocs_Purchased");
+employees = metrics.getJSON("Employee_Count") - 1;
+if(employees = 0)
+{
+	employees = 1;
+}
+if(resp.getJson("Account_Type") == "Customer" && (stage.containsIgnoreCase("Roll Out Phase 1") || stage.containsIgnoreCase("Roll Out Phase 2") || stage.contains("Account Management")) && eDocsPurchased <= 10 && employees > 2)
+{
+	noEdocsPurchased = true;
+	info "true";
+}
+newMap = Map();
+newMap.put("eDocs_Campaign",noEdocsPurchased);
+updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+info updateResp;
