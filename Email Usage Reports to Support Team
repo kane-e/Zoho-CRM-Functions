@@ -1,0 +1,19 @@
+//resp = zoho.crm.getRecordById("Accounts", AccountId.toLong());
+emmaId = "emma@liscio.me";
+emilyId = "emily@liscio.me";
+brandonId = "brandon@liscio.me";
+ryanId = "ryan@lisico.me";
+kariId = "kari@liscio.me";
+savannahId = "savannahv@liscio.me";
+dandreId = "d'andre@liscio.me";
+supportTeam = {emmaId,emilyId,brandonId,ryanId,kariId,savannahId,dandreId};
+for each  member in supportTeam
+{
+	sendmail
+	[
+		from :zoho.adminuserid
+		to :member
+		subject :"Weekly Usage Reports"
+		message :"Click this link to review this week's usage reports: https://crm.zoho.com/crm/org717234810/tab/Reports?folder=4541218000019983183"
+	]
+}
