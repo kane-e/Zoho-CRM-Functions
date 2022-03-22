@@ -1,0 +1,30 @@
+//Flag accounts with increase in expired invites in past 4 weeks
+
+resp = zoho.crm.getRecordById("Accounts",AccountId);
+//info resp;
+metrics = zoho.crm.getRelatedRecords("Accounts","Accounts",AccountId).toList();
+if(metrics.size() > 4)
+{
+	metricOne = metrics.get(0).getJSON("Expired_Contacts");
+	metricTwo = metrics.get(1).getJSON("Expired_Contacts");
+	metricThree = metrics.get(2).getJSON("Expired_Contacts");
+	metricFour = metrics.get(3).getJSON("Expired_Contacts");
+	newMap = Map();
+	if(metricOne > metricFour && metricOne >= metricTwo && metricTwo >= metricThree)
+	{
+		expiredInvites = true;
+		info "true";
+	}
+	else
+	{
+		expiredInvites = false;
+		info "false";
+	}
+	newMap.put("Incr_in_Exp_Invites",expiredInvites);
+	updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+	info updateResp;
+}
+else
+{
+	info "No info";
+}
