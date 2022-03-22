@@ -1,0 +1,53 @@
+//If average of last five employee usage metrics is less than 33% of all average employee usage metrics, account is added to Employee Usage Drop report. 
+resp = zoho.crm.getRelatedRecords("Accounts","Accounts",AccountId.toLong());
+respJSON = resp.toJsonList();
+if(respJSON.size() > 5)
+{
+	// Average of all metrics
+	totalList = list();
+	for each  rec in respJSON
+	{
+		usage = rec.getJson("Total_Employee_Usage");
+		if(usage.isNull())
+		{
+			usage = 0.01;
+		}
+		else if(usage == 0)
+		{
+			usage = 0.01;
+		}
+		totalList.add(usage);
+		averageUsage = totalList.average().ceil();
+	}
+	//Average of latest five metrics 
+	latest = respJSON.get(0).getJSON("Total_Employee_Usage");
+	secondLatest = respJSON.get(1).getJSON("Total_Employee_Usage");
+	thirdLatest = respJSON.get(2).getJSON("Total_Employee_Usage");
+	fourthLatest = respJSON.get(3).getJSON("Total_Employee_Usage");
+	fifthLatest = respJSON.get(4).getJSON("Total_Employee_Usage");
+	recentList = list();
+	recentList.add(latest);
+	recentList.add(secondLatest);
+	recentList.add(thirdLatest);
+	recentList.add(fourthLatest);
+	recentList.add(fifthLatest);
+	info recentList;
+	recentAverage = recentList.average().ceil();
+	info recentAverage;
+	info averageUsage;
+	usageProportion = recentAverage / averageUsage;
+	info usageProportion;
+	newMap = Map();
+	if(usageProportion < .33)
+	{
+		newMap.put("Employee_Usage_Drop",true);
+		updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+		info "true";
+	}
+	else
+	{
+		newMap.put("Employee_Usage_Drop",false);
+		updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+		info "false";
+	}
+}
