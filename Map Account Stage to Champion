@@ -1,0 +1,10 @@
+resp = zoho.crm.getRecordById("Accounts",AccountId.toLong());
+//info resp;
+championId = resp.getJson("Liscio_Champion").getJSON("id");
+//info championId;
+stage = resp.getJson("Onboarding_Stage");
+//info accountRisk;
+newMap = Map();
+newMap.put("Onboarding_Stage",stage);
+updateResp = zoho.crm.updateRecord("Contacts",championId.toLong(),newMap);
+info updateResp;
