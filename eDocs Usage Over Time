@@ -1,0 +1,23 @@
+//Identify firms that have had eDocs set up for at least one month  for UP eDocs survey
+
+resp = zoho.crm.getRecordById("Accounts",AccountId);
+//info resp;
+if(resp.getJson("Account_Type") == "Customer")
+{
+	metrics = zoho.crm.getRelatedRecords("Accounts","Accounts",AccountId).toList();
+	if(metrics.size() > 4)
+	{
+		metricFive = metrics.get(4);
+		info metricFive;
+		eDocStatus = metricFive.getJSON("eDocs");
+		//info eDocStatus;
+		newMap = Map();
+		newMap.put("UP_eDocs_Report",eDocStatus);
+		updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+		info updateResp;
+	}
+	else
+	{
+		info "No info";
+	}
+}
