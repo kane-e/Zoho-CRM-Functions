@@ -1,0 +1,22 @@
+//Days from Queued to Uploaded
+
+resp = zoho.crm.getRecordById("Accounts",AccountId);
+data = zoho.crm.getRelatedRecords("Data","Accounts",AccountId);
+startDate = resp.getJSON("Data_Queued_Date");
+if(startDate != null)
+{
+	dataStage = data.getJSON("Data_Stage");
+	//modifiedTime = data.getJSON("Modified_Time").subText(0,10);
+	currentDate = today;
+	if(dataStage.contains("Uploaded"))
+	{
+		daysToUpload = workDaysBetween(startDate,currentDate);
+		info daysToUpload;
+	}
+	info startDate;
+	newMap = Map();
+	newMap.put("Days_to_Data_Completed",daysToUpload);
+	newMap.put("Data_Completed_Date",currentDate);
+	updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+	info updateResp;
+}
