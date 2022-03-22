@@ -1,0 +1,47 @@
+resp = zoho.crm.getRecordById("Accounts",AccountId.toLong());
+respJson = resp.toJSONList();
+info respJson;
+stage = resp.getJSON("Onboarding_Stage");
+setupDate = resp.getJSON("Onboarding_Start_Date");
+info setupDate;
+dateCreated = resp.getJSON("Created_Time").toDate();
+currentDate = zoho.currenttime.toDate();
+goLiveDate = resp.getJSON("Go_Live_Date");
+newMap = Map();
+// if onboarding start dte is populated (newer accounts only, the date when account changes to onboarding), days elapsed is measured from there
+if(stage != null && setupDate != null)
+{
+	daysElapsed = days360(setupDate,currentDate);
+	//info daysElapsed;
+}
+// otherwise, days elaspsed is measured from date account was created in CRM
+else if(stage != null && setupDate == null)
+{
+	setupDate = resp.getJSON("Created_Time");
+	daysElapsed = days360(dateCreated,currentDate);
+	info daysElapsed;
+}
+if(goLiveDate != null && stage.containsIgnoreCase("prepartion"))
+{
+	goLiveDate = goLiveDate.toDate();
+	daysSinceGoLive = days360(goLiveDate,currentDate);
+	info daysSinceGoLive;
+	if(daysSinceGoLive >= 14)
+	{
+		newMap.put("Stalled",true);
+		updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+	}
+}
+else if(daysElapsed > 29 && stage.containsIgnoreCase("onboarding"))
+{
+	newMap.put("Stalled",true);
+	updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+	info updateResp;
+}
+else
+{
+	newMap.put("Stalled",false);
+	updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+	info "true";
+	info updateResp;
+}
