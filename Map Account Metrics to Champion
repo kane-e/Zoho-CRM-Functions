@@ -1,0 +1,191 @@
+// Map metrics from Account to Contact so that they can be synced to Zoho Campaigns for Digest Emails
+resp = zoho.crm.getRecordById("Accounts",AccountId);
+//info resp;
+if(resp.getJson("Account_Type") == "Customer" && (resp.getJSON("Onboarding_Stage").containsIgnoreCase("Roll Out Phase 1") || resp.getJSON("Onboarding_Stage").containsIgnoreCase("Roll Out Phase 2") || resp.getJSON("Onboarding_Stage").containsIgnoreCase("Account Management")))
+{
+	championId = resp.getJson("Liscio_Champion").getJSON("id");
+	//info championId;
+	owner = resp.getJSON("Owner").getJSON("name").toList(" ").get(0);
+	//ownerFirstName = owner.toList(" ").get(0);
+	employees = resp.getJson("Active_Employees");
+	employeeCount = employees - 1;
+	if(employeeCount == 0)
+	{
+		employeeCount = employees;
+	}
+	if(employeeCount < 5)
+	{
+		firmSize = "Small";
+	}
+	else if(employeeCount >= 5 && employeeCount <= 10)
+	{
+		firmSize = "Medium";
+	}
+	else
+	{
+		firmSize = "Large";
+	}
+	info employeeCount;
+	metrics = zoho.crm.getRelatedRecords("Accounts","Accounts",AccountId).toList();
+	if(metrics.size() > 3)
+	{
+		//info metrics;
+		accountName = metrics.getJson("Account").getJSON("name");
+		metricOne = metrics.get(0).replaceAll("null",0);
+		metricTwo = metrics.get(1).replaceAll("null",0);
+		metricThree = metrics.get(2).replaceAll("null",0);
+		metricFour = metrics.get(3).replaceAll("null",0);
+		// metrics from current period
+		activation = round((metricOne.getJson("of_Contacts_Active") + metricTwo.getJson("of_Contacts_Active")) / 2,2);
+		activationWhole = round(activation * 100,0);
+		// activationWhole;
+		messages = metricOne.getJson("Total_Messages") + metricTwo.getJson("Total_Messages");
+		files = metricOne.getJson("Total_Files_Uploaded") + metricTwo.getJson("Total_Files_Uploaded");
+		employeeUsage = metricOne.getJson("Total_Employee_Usage").ceil() + metricTwo.getJson("Total_Employee_Usage").ceil();
+		tasks = metricOne.getJson("Tasks_Closed").ceil() + metricTwo.getJson("Tasks_Closed").ceil();
+		eDocs = metricOne.getJson("eDocs_Sent").ceil() + metricTwo.getJson("eDocs_Sent").ceil();
+		cstPercent = metricOne.getJson("CST_Percentage").ceil();
+		info eDocs;
+		info cstPercent;
+		firmDashCount = round((metricOne.getJson("FirmDash_Count") + metricTwo.getJson("FirmDash_Count")) / 2,0);
+		firmDashPercent = round(firmDashCount / employeeCount * 100,0);
+		if(firmDashPercent >= 100)
+		{
+			firmDashPercent = 100;
+		}
+		if(firmDashPercent < 70)
+		{
+			firmDashGood = "no";
+		}
+		else
+		{
+			firmDashGood = "yes";
+		}
+		//info firmDashPercent;
+		clientAppCount = round((metricOne.getJson("Mobile_App_Count") + metricTwo.getJson("Mobile_App_Count")) / 2,0);
+		activeContacts = round((metricOne.getJson("Active_Contacts") + metricTwo.getJson("Active_Contacts")) / 2,0);
+		if(activeContacts = 0)
+		{
+			activeContacts = 1;
+		}
+		clientAppPercent = round(clientAppCount / activeContacts * 100,0);
+		if(clientAppPercent >= 100)
+		{
+			clientAppPercent = 100;
+		}
+		if(clientAppPercent < 70)
+		{
+			clientAppGood = "no";
+		}
+		else
+		{
+			clientAppGood = "yes";
+		}
+		//info clientAppPercent;
+		// metrics from past period
+		messagesPast = metricThree.getJson("Total_Messages") + metricFour.getJson("Total_Messages");
+		filesPast = metricThree.getJson("Total_Files_Uploaded") + metricFour.getJson("Total_Files_Uploaded");
+		tasksPast = metricThree.getJson("Tasks_Closed").ceil() + metricFour.getJson("Tasks_Closed").ceil();
+		eDocsPast = metricThree.getJson("eDocs_Sent").ceil() + metricFour.getJson("eDocs_Sent").ceil();
+		// next activation goal
+		//special case if  at 100% or 0%
+		info activationWhole;
+		if(activationWhole == 100)
+		{
+			activationNext = 200;
+		}
+		else if(activationWhole == 0)
+		{
+			activationNext = 10;
+		}
+		// round up if activation % if multiple of 10
+		else if(activationWhole > 1 && activationWhole.length() == 2 && activationWhole.contains(0))
+		{
+			activationNext = ceil(activation * 10) * 10 + 10;
+		}
+		else
+		{
+			activationNext = ceil(activation * 10) * 10;
+		}
+		// current messages compared to past
+		if(messages == messagesPast)
+		{
+			messagesOld = "same";
+		}
+		else if(messages > messagesPast)
+		{
+			messagesOld = "more";
+		}
+		else if(messages < messagesPast)
+		{
+			messagesOld = "less";
+		}
+		// current files compared to past
+		if(files == filesPast)
+		{
+			filesOld = "same";
+		}
+		else if(files > filesPast)
+		{
+			filesOld = "more";
+		}
+		else if(files < filesPast)
+		{
+			filesOld = "less";
+		}
+		// current tasks completed compared to past
+		if(tasks == tasksPast)
+		{
+			tasksOld = "same";
+		}
+		else if(tasks > tasksPast)
+		{
+			tasksOld = "more";
+		}
+		else if(tasks < tasksPast)
+		{
+			tasksOld = "less";
+		}
+		if(eDocs == eDocsPast)
+		{
+			eDocsOld = "same";
+		}
+		else if(eDocs > eDocsPast)
+		{
+			eDocsOld = "more";
+		}
+		else if(eDocs < eDocsPast)
+		{
+			eDocsOld = "less";
+		}
+		info activationNext;
+		info messagesOld;
+		info filesOld;
+		info tasksOld;
+		info firmDashPercent;
+		info clientAppPercent;
+		info firmSize;
+		// map current metrics and comparison to champion contact page
+		newMap = Map();
+		newMap.put("Account_Owner",owner);
+		newMap.put("Client_Name",accountName);
+		newMap.put("Firm_Size",firmSize);
+		newMap.put("of_Contacts_Active",activationWhole);
+		newMap.put("Total_Messages",messages);
+		newMap.put("Total_Files_Uploaded",files);
+		newMap.put("Tasks_Closed",tasks);
+		newMap.put("Mobile_App",clientAppPercent);
+		newMap.put("FirmDash",firmDashPercent);
+		newMap.put("Activation_Next",activationNext);
+		newMap.put("Messages_Old",messagesOld);
+		newMap.put("Files_Old",filesOld);
+		newMap.put("Tasks_Closed_Old",tasksOld);
+		newMap.put("FirmDash_Good",firmDashGood);
+		newMap.put("Mobile_App_Good",clientAppGood);
+		newMap.put("eDocs_Sent",eDocs);
+		newMap.put("eDocs_Old",eDocsOld);
+		newMap.put("CST_Percentage",cstPercent);
+		updateResp = zoho.crm.updateRecord("Contacts",championId.toLong(),newMap);
+		info updateResp;
+	}
+}
