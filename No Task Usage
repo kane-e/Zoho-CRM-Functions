@@ -1,0 +1,37 @@
+// Flag accounts in RO Phase 1 or above & have more than 2 active contacts that have not used any tasks in past two weeks
+resp = zoho.crm.getRecordById("Accounts",AccountId);
+stage = resp.getJSON("Onboarding_Stage");
+//info resp;
+if(resp.getJson("Account_Type") == "Customer" && (stage.containsIgnoreCase("Roll Out Phase 1") || stage.containsIgnoreCase("Roll Out Phase 2") || stage.contains("Account Management")))
+{
+	metrics = zoho.crm.getRelatedRecords("Accounts","Accounts",AccountId).replaceAll("null",0).toList();
+	activeContacts = metrics.getJSON("Active_Contacts");
+	info activeContacts;
+	if(metrics.size() > 2 && activeContacts > 1)
+	{
+		metricOne = metrics.get(0).getJSON("Tasks_Closed");
+		metricTwo = metrics.get(1).getJSON("Tasks_Closed");
+		newMap = Map();
+		if(metricOne = 0 && metricTwo = 0)
+		{
+			lowTaskUsage = true;
+			info "true";
+		}
+		else
+		{
+			lowTaskUsage = false;
+			info "false";
+		}
+		newMap.put("Low_Task_Usage",lowTaskUsage);
+		updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+		info updateResp;
+	}
+	else
+	{
+		info "Not enough metrics";
+	}
+}
+else
+{
+	info "Does not apply";
+}
