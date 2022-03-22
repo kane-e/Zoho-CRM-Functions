@@ -1,0 +1,23 @@
+//resp = zoho.crm.getRecordById("Accounts", AccountId.toLong());
+emmaId = "4541218000013540001";
+emilyId = "4541218000000295001";
+brandonId = "4541218000007357001";
+ryanId = "4541218000000296001";
+kariId = "4541218000051111001";
+savannahId = "4541218000053122001";
+dandreId = "4541218000053124001";
+supportTeam = {emmaId,emilyId,brandonId,ryanId,kariId,savannahId,dandreId};
+for each  member in supportTeam
+{
+	currentDate = zoho.currenttime.toDate();
+	mp = Map();
+	mp.put("Subject","Review Usage Reports");
+	mp.put("Owner",member);
+	mp.put("Due_Date",currentDate.addDay(4));
+	mp.put("Remind_At",{"ALARM":"FREQ=NONE;ACTION=EMAIL;TRIGGER=DATE-TIME:" + currentDate.addDay(3).toString("yyyy-MM-dd'T'HH:mm:ss'+07:30'")});
+	mp.put("Status","Not Started");
+	//mp.put("Send_Notification_Email",true);
+	createTask = zoho.crm.createRecord("Tasks",mp);
+	info mp;
+	info createTask;
+}
