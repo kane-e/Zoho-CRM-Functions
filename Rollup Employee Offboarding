@@ -1,0 +1,39 @@
+// current level = current active employee count / average active employee count
+// if average active employees is greater than 4 (mid size firms) and current level is less than 65%, employee drop is true
+// if average active employees is greater than 4 (mid size firms) and current level is greater than 65%, employee drop alert is false
+// if average active employees is equal to or less than 4, employee drop alert is N/A.
+resp = zoho.crm.getRelatedRecords("Accounts","Accounts",AccountId.toLong());
+//info resp;
+respList = resp.toJsonList();
+employeeCount = respList.getJSON("Employee_Count");
+info employeeCount;
+metricsList = list();
+for each  rec in respList
+{
+	employees = rec.getJson("Employee_Count");
+	if(employees.isNull())
+	{
+		employees = 0;
+	}
+	metricsList.add(employees);
+}
+averageEmployees = metricsList.average().ceil();
+currentLevel = employeeCount / averageEmployees;
+info currentLevel;
+if(averageEmployees > 4 && currentLevel >= .65 || currentLevel == 0)
+{
+	employeeAlert = "False";
+}
+else if(averageEmployees > 4 && currentLevel < .65)
+{
+	employeeAlert = "True";
+}
+else if(averageEmployees <= 4)
+{
+	employeeAlert = "N/A";
+}
+newMap = Map();
+newMap.put("Employee_Drop",employeeAlert);
+updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+info employeeAlert;
+info updateResp;
