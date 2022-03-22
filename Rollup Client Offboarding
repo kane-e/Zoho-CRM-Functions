@@ -1,0 +1,46 @@
+// if average active employees is greater than 4 (mid size firms) and number of current active contacts is less than 65% of average active contacts, client drop is true
+// if average active employees is greater than 4 (mid size firms) and number of current active contacts is greater than 65% of average active contacts, client drop is false
+// if average active employees is equal to or less than 4, client drop is N/A
+resp = zoho.crm.getRelatedRecords("Accounts","Accounts",AccountId.toLong());
+//info resp;
+respList = resp.toJsonList();
+employeeList = list();
+contactList = list();
+for each  rec in respList
+{
+	employees = rec.getJson("Employee_Count");
+	employeeList.add(employees);
+	employeeList.removeAll("null");
+	activeContacts = respList.getJSON("Active_Contacts");
+	if(activeContacts.isNull())
+	{
+		activeContacts = 0;
+	}
+	contactList.add(activeContacts);
+}
+averageList = contactList.average().ceil();
+if(averageList == 0)
+{
+	averageList = 1;
+}
+currentProportion = activeContacts / averageList;
+info currentProportion;
+averageEmployeeList = employeeList.average().ceil();
+info averageEmployeeList;
+if(currentProportion >= .65 && averageEmployeeList > 4 || currentProportion == 0)
+{
+	contactAlert = "False";
+}
+else if(currentProportion < .65 && averageEmployeeList > 4)
+{
+	contactAlert = "True";
+}
+else if(averageEmployeeList <= 4)
+{
+	contactAlert = "N/A";
+}
+newMap = Map();
+newMap.put("Client_Drop",contactAlert);
+updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+info contactAlert;
+info updateResp;
