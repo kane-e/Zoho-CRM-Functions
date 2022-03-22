@@ -1,0 +1,18 @@
+// Roll up CMRR OF CLosed Won Active Deals
+
+resp = zoho.crm.getRelatedRecords("Deals","Accounts",AccountId.toLong());
+//info resp;
+for each  rec in resp
+{
+	stage = rec.get("Stage");
+	notActive = rec.get("No_Longer_Active");
+	if(stage.containsIgnoreCase("closed won") && notActive == "false")
+	{
+		CMRR = rec.getJSON("CMRR");
+	}
+}
+info CMRR;
+newMap = Map();
+newMap.put("Total_CMRR",CMRR);
+updateResp = zoho.crm.updateRecord("Accounts",AccountId.toLong(),newMap);
+//info updateResp;
